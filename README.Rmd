@@ -5,126 +5,27 @@ date: "February 16, 2016"
 output: html_document
 ---
 
-### Preliminary step: Loading libraries and data
-``` {r}
-library(dplyr)
-library(plyr)
-library(tidyr)
-download.file(url = "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",
-              destfile = "data/wearabledata.zip",
-              method = "curl")
+# Getting and Cleaning Data: Course Project
 
-unzip("data/wearabledata.zip", exdir = "./data/")
-```
+## Introduction
+The goal of this project is to prepare tidy data that is synthesized from human activity data collected using a Samsung Galaxy S smartphone. 
 
-## Q1. Merge the test and train data frames
-``` {r}
-# get the text files to read
-file_list_test <- list.files("./data/UCI HAR Dataset/test/", pattern = "*.txt")
-file_list_train <- list.files("./data/UCI HAR Dataset/train/", pattern = "*.txt")
+A full description of the human activity data is available at the site where the data was obtained:
+	http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
 
-# inverse the order of the files, to put subject and activity columns upfront
-file_list_test <- file_list_test[order(desc(file_list_test))]
-file_list_train <- file_list_train[order(desc(file_list_train))]
+The data set can be found in a zipped file at:
+	https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
 
-# create test data frame
-rm(test)
-for (file in file_list_test){
-    # if the merged dataset doesn't exist, create it
-    if (!exists("test")){
-        test <- read.table(paste0("./data/UCI HAR Dataset/test/",file))
-    } else {
-        temp_dataset <-read.table(paste0("./data/UCI HAR Dataset/test/",file))
-        test<-cbind(test, temp_dataset)
-        rm(temp_dataset)
-    }
-}
+## Tidy Data and Script
+The tidy data was created using R script called 'run_analysis.R' that does the following. 
+Explanations are provided in 'run_analysis.Rmd'
 
-# create train data frame
-rm(train)
-for (file in file_list_train){
-    # if the merged dataset doesn't exist, create it
-    if (!exists("train")){
-        train <- read.table(paste0("./data/UCI HAR Dataset/train/",file))
-    } else {
-        temp_dataset <-read.table(paste0("./data/UCI HAR Dataset/train/",file))
-        train<-cbind(train, temp_dataset)
-        rm(temp_dataset)
-    }
-}
+1. Merges the training and the test sets from the downloaded data to create one data set.
+2. Extracts only the measurements on the mean and standard deviation for each measurement.
+3. Uses descriptive activity names to name the activities in the data set, and appropriately labels the data set with descriptive variable names.
+4. From the dataset above, it creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 
-# Merge the test and train data frames
-merged <- rbind(test,train)
+The output is a tidy data in a file named 'step5-data.txt.'  
 
-# change the column names
-names(merged)[1] <- "activity"
-names(merged)[2] <- "subject"
-
-# Printout
-str(merged)
-```
-
-
-
-## Q2. Extract the mean and standard deviation for each measurement
-```{r}
-# Read the names of the observations from data file
-features <- read.table(file = "data/UCI HAR Dataset/features.txt", stringsAsFactors = FALSE)
-featuretitles <- features[,2]
-
-# Obtain which column number contain "mean" and "std"
-tokeepmean <- which(sapply(featuretitles,grepl,pattern="mean"))
-tokeepstd <- which(sapply(featuretitles,grepl,pattern="std"))
-
-# Merge (concatenate) these column numbers, include 1 and 2 (activity and subject)
-tokeep <- c(1,2,tokeepmean+2 ,tokeepstd+2)
-tokeep <- tokeep[order(tokeep)]
-
-# Select the approriate columns out of the "merged" data frame from Q1
-df <- select(merged,tokeep)
-
-# Printout
-str(df)
-```
-
-## Q3. Replace activity values (1-6) by descriptive activity names in dataset
-```{r}
-# read activity labels from data file
-activities <- read.table(file = "data/UCI HAR Dataset/activity_labels.txt")
-activitylabel <- activities[,2]
-head(activitylabel)
-
-# Assign the activity label to corresponding activity value
-df$activity <- sapply(df$activity,function(x) {activitylabel[x]})
-
-# Printout 
-str(df)
-```
-
-## Q4. Appropriately labels the data set with descriptive variable names.
-This task was performed along Q1 and Q2
-```{r}
-# Printout
-names(df)
-```
-
-## Q5. Create tidy dataset with average value for each variable for each activity and subject
-```{r}
-# Get the column names for the variables (observations)
-variables <- names(df)[-c(1,2)]
-
-# Perform aggregate with function "mean" on these variables, by columns "activity" and "subject"
-av.df <- aggregate(df[variables],by = df[c("activity","subject")], FUN = mean, na.rm = TRUE)
-
-# Rename the variable column names by adding "average"
-names(av.df)[-c(1,2)] <- paste0("average[" , variables , "]")
-
-# Final printout
-str(av.df)
-```
-
-## Generating output data
-```{r}
-# Write in text file
-write.table(av.df, row.names = FALSE,file = "step5-data.txt")
-```
+##Code Book
+Also included here is a code book 'Codebook.md' describing the variables.
