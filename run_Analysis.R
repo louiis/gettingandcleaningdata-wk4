@@ -1,5 +1,6 @@
 
 library(dplyr)
+library(plyr)
 library(tidyr)
 download.file(url = "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",
               destfile = "data/wearabledata.zip",
@@ -51,8 +52,6 @@ names(merged)[2] <- "subject"
 # get the names of the observations
 features <- read.table(file = "data/UCI HAR Dataset/features.txt", stringsAsFactors = FALSE)
 featuretitles <- features[,2]
-#names(merged)[3:length(names(merged))] <-  features[,2]
-#names(merged)
 
 # Q2. Extract the mean and standard deviation for each measurement
 tokeepmean <- which(sapply(featuretitles,grepl,pattern="mean"))
@@ -65,3 +64,21 @@ df <- select(merged,tokeep)
 head(df)
 
 # Q3. Using descriptive activity names in dataset
+activities <- read.table(file = "data/UCI HAR Dataset/activity_labels.txt")
+activitylabel <- activities[,2]
+activitylabel
+df$activity <- sapply(df$activity,function(x) {activitylabel[x]})
+
+
+# Q4. Already done in previous questions
+
+# Q5. Create tidy dataset with average value for each variable for each activity and subject
+variables <- names(df)[-c(1,2)]
+av.df <- aggregate(df[variables],by = df[c("activity","subject")], FUN = mean, na.rm = TRUE)
+
+names(av.df)[-c(1,2)] <- paste0("average[" , variables , "]")
+
+str(av.df)
+
+# Output data
+write.table(av.df, row.names = FALSE,file = "step5-data.txt")

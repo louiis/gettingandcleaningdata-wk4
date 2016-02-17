@@ -5,7 +5,7 @@ date: "February 16, 2016"
 output: html_document
 ---
 
-## Preliminary work: Loading libraries and data
+### Preliminary step: Loading libraries and data
 ``` {r}
 library(dplyr)
 library(plyr)
@@ -121,4 +121,10 @@ names(av.df)[-c(1,2)] <- paste0("average[" , variables , "]")
 
 # Final printout
 str(av.df)
+```
+
+## Generating output data
+```{r}
+# Write in text file
+write.table(av.df, row.names = FALSE,file = "step5-data.txt")
 ```

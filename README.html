@@ -68,8 +68,8 @@ img {
 </div>
 
 
-<div id="preliminary-work-loading-libraries-and-data" class="section level2">
-<h2>Preliminary work: Loading libraries and data</h2>
+<div id="preliminary-step-loading-libraries-and-data" class="section level3">
+<h3>Preliminary step: Loading libraries and data</h3>
 <pre class="r"><code>library(dplyr)</code></pre>
 <pre><code>## 
 ## Attaching package: 'dplyr'</code></pre>
@@ -588,6 +588,11 @@ str(av.df)</code></pre>
 ##  $ average[fBodyBodyGyroJerkMag-mean()]    : num  -0.942 -0.99 -0.995 -0.319 -0.282 ...
 ##  $ average[fBodyBodyGyroJerkMag-std()]     : num  -0.933 -0.987 -0.995 -0.382 -0.392 ...
 ##  $ average[fBodyBodyGyroJerkMag-meanFreq()]: num  0.176 0.185 0.334 0.191 0.19 ...</code></pre>
+</div>
+<div id="generating-output-data" class="section level2">
+<h2>Generating output data</h2>
+<pre class="r"><code># Write in text file
+write.table(av.df, row.names = FALSE,file = &quot;step5-data.txt&quot;)</code></pre>
 </div>
 
 
